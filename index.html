@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Collège Ludique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0f1b33;--card:#182846;--line:#2a3d62;--txt:#f4f1ea;--mute:#a9b6d3;--ok:#3ddc97;--ko:#ff6b6b;--c:#ffd166}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--ink);color:var(--txt);min-height:100vh;line-height:1.5}
+header{max-width:1080px;margin:auto;padding:22px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;cursor:pointer}
+.logo span{color:#ffd166}
+.score{font-size:.95rem;color:var(--mute)} .score b{color:var(--txt);font-size:1.1rem}
+main{max-width:1080px;margin:auto;padding:8px 24px 72px}
+h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.05;letter-spacing:-.02em;max-width:16ch}
+.intro{color:var(--mute);margin:12px 0 24px;max-width:52ch;font-size:1.05rem}
+.levels{display:inline-flex;gap:6px;background:var(--card);padding:6px;border-radius:14px;border:1px solid var(--line);margin-bottom:26px;flex-wrap:wrap}
+.levels button{background:none;border:0;color:var(--mute);padding:10px 20px;border-radius:10px;cursor:pointer;font:inherit;font-weight:700}
+.levels button.on{background:var(--c);color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.tile{position:relative;text-align:left;font:inherit;color:var(--txt);cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px 22px 20px;transition:transform .2s,border-color .2s;overflow:hidden}
+.tile::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--c)}
+.tile:hover{transform:translateY(-3px);border-color:var(--c)}
+.tile .ico{font-size:2rem}
+.tile h3{font-size:1.25rem;margin:12px 0 2px}
+.tile p{color:var(--mute);font-size:.95rem}
+.tile .best{margin-top:14px;display:inline-block;font-size:.85rem;background:rgba(255,255,255,.06);padding:4px 10px;border-radius:999px;color:var(--c)}
+:focus-visible{outline:3px solid var(--c);outline-offset:3px}
+.btn{background:var(--c);color:var(--ink);border:0;padding:12px 20px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+.head{display:flex;align-items:center;gap:14px;margin:18px 0 6px}
+.head .ico{font-size:2.4rem}
+.head h1{font-size:clamp(1.7rem,4vw,2.4rem)}
+.chap{color:var(--mute);margin-bottom:22px}
+.tabs{display:inline-flex;gap:6px;background:var(--card);padding:6px;border-radius:14px;border:1px solid var(--line);margin-bottom:18px;max-width:100%}
+.tab{background:none;border:0;color:var(--mute);padding:10px 18px;border-radius:10px;cursor:pointer;font:inherit;font-weight:700}
+.tab.on{background:var(--c);color:var(--ink)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:clamp(20px,4vw,32px)}
+.panel h2{color:var(--c);font-size:1.4rem;margin-bottom:12px}
+.panel ul{list-style:none;display:grid;gap:10px}
+.panel li{padding-left:22px;position:relative;font-size:1.05rem}
+.panel li::before{content:"";position:absolute;left:0;top:.6em;width:9px;height:9px;border-radius:3px;background:var(--c)}
+.panel li b{color:#fff}
+.meta{color:var(--mute);font-size:.95rem;margin-bottom:10px}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:22px}
+.bar div{height:100%;background:var(--c);transition:width .35s}
+.q{font-size:clamp(1.2rem,3vw,1.5rem);font-weight:700;margin-bottom:20px;line-height:1.25}
+.opts{display:grid;gap:10px}
+.opt{background:var(--ink);border:1px solid var(--line);color:var(--txt);padding:15px 18px;border-radius:14px;text-align:left;font:inherit;font-size:1.05rem;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.good{border-color:var(--ok);background:rgba(61,220,151,.14)}
+.opt.bad{border-color:var(--ko);background:rgba(255,107,107,.14)}
+.exp{margin-top:18px;padding:16px;border-radius:14px;background:var(--ink);border-left:4px solid var(--c);line-height:1.55}
+.exp strong{display:block;margin-bottom:4px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
+.end{text-align:center;padding:14px 0 6px}
+.end .big{font-size:clamp(3.5rem,12vw,5.5rem);font-weight:800;color:var(--c);line-height:1}
+.end p{color:var(--mute);margin:12px 0 24px;font-size:1.1rem}
+.end .row{justify-content:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" id="home" role="button" tabindex="0">Collège <span>Ludique</span></div>
+  <div class="score">Score total <b id="total">0</b></div>
+</header>
+<main id="app"></main>
+
+<script>
+// Programme de 6e : chaque matière contient ses chapitres, chacun avec un cours et des exercices.
+window.DATA_6E = [
+{id:'maths', ico:'➗', name:'Mathématiques', c:'#ffd166', desc:'Nombres, géométrie et grandeurs.', chapters:[
+ {title:'Les nombres décimaux',
+  p:['Dans <b>4,57</b>, le 5 est le chiffre des <b>dixièmes</b> et le 7 celui des <b>centièmes</b>.',
+     'Pour comparer, on compare la partie entière, puis les dixièmes, puis les centièmes : <b>2,8 > 2,75</b>.',
+     'Multiplier par 0,5 revient à prendre la moitié : 12 × 0,5 = 6.'],
+  q:[{q:'Quel est le chiffre des dixièmes de 4,57 ?',o:['4','5','7','57'],a:1,e:'Le premier chiffre après la virgule est celui des dixièmes : 5.'},
+     {q:'Lequel est le plus grand ?',o:['2,75','2,8','2,075','2,07'],a:1,e:'2,8 = 2,80 et 2,80 > 2,75.'},
+     {q:'Combien vaut 12 × 0,5 ?',o:['5','6','12','24'],a:1,e:'Multiplier par 0,5 revient à prendre la moitié : 6.'}]},
+ {title:'La symétrie axiale',
+  p:['Deux figures sont <b>symétriques par rapport à une droite</b> (l’axe) si l’axe est la médiatrice des segments qui relient leurs points.',
+     'Une figure symétrique garde les <b>mêmes longueurs</b> et les mêmes angles que la figure de départ.',
+     'Un point situé sur l’axe est son propre symétrique.'],
+  q:[{q:'Une figure et sa symétrique ont-elles les mêmes longueurs ?',o:['Oui','Non','Seulement les côtés','Jamais'],a:0,e:'La symétrie axiale conserve les longueurs et les angles.'},
+     {q:'Combien d’axes de symétrie possède un carré ?',o:['1','2','4','Aucun'],a:2,e:'Le carré a 4 axes : 2 médiatrices de ses côtés et 2 diagonales.'},
+     {q:'Le symétrique d’un point situé sur l’axe est :',o:['Un point différent','Le même point','Le milieu du segment','Hors de la figure'],a:1,e:'Un point sur l’axe est déjà à égale distance de lui-même.'}]},
+ {title:'Périmètre et aire',
+  p:['Le <b>périmètre</b> est la longueur du contour. Rectangle : P = 2 × (L + l).',
+     'L’<b>aire</b> est la surface. Rectangle : A = L × l. Carré de côté c : A = c × c.',
+     'Les unités d’aire sont les cm², m², km²… (ce ne sont pas des longueurs).'],
+  q:[{q:'Quel est le périmètre d’un rectangle de 5 cm sur 3 cm ?',o:['8 cm','15 cm','16 cm','30 cm'],a:2,e:'P = 2 × (5 + 3) = 16 cm.'},
+     {q:'Quelle est l’aire d’un rectangle de 5 cm sur 3 cm ?',o:['8 cm²','15 cm²','16 cm²','30 cm²'],a:1,e:'A = 5 × 3 = 15 cm².'},
+     {q:'Quelle est l’aire d’un carré de 4 cm de côté ?',o:['8 cm²','12 cm²','16 cm²','4 cm²'],a:2,e:'A = 4 × 4 = 16 cm².'}]}
+]},
+{id:'francais', ico:'📚', name:'Français', c:'#ff8fa3', desc:'Groupe nominal, verbes et récit.', chapters:[
+ {title:'Le groupe nominal',
+  p:['Un <b>groupe nominal</b> est organisé autour d’un nom : <b>déterminant + nom + adjectif</b>.',
+     'Le <b>déterminant</b> (le, la, un, ces, mon…) se place devant le nom.',
+     'L’<b>adjectif</b> qualifie le nom : « une maison <b>vieille</b> ».'],
+  q:[{q:'Dans « la vieille maison », quel est le déterminant ?',o:['vieille','maison','la','vieille maison'],a:2,e:'« La » introduit le nom « maison » : c’est le déterminant.'},
+     {q:'Quel est l’adjectif dans « un chien féroce » ?',o:['un','chien','féroce','chien féroce'],a:2,e:'« Féroce » qualifie le nom « chien ».'},
+     {q:'Quel est le nom principal de « ces belles fleurs » ?',o:['ces','belles','fleurs','belle'],a:2,e:'Le groupe s’organise autour de « fleurs ».'}]},
+ {title:'Le présent de l’indicatif',
+  p:['Les verbes du 1er groupe (en -er) ont les terminaisons <b>-e, -es, -e, -ons, -ez, -ent</b> : je chant<b>e</b>, nous chant<b>ons</b>.',
+     'Certains verbes sont irréguliers, comme <b>aller</b> : je vais, ils vont.',
+     'Au présent, on accorde le verbe avec son sujet.'],
+  q:[{q:'Conjuguez « chanter » avec « je » :',o:['je chante','je chantes','je chantons','je chantent'],a:0,e:'Terminaison -e à la 1re personne du singulier.'},
+     {q:'Conjuguez « aller » avec « ils » :',o:['ils allent','ils vont','ils vais','ils allons'],a:1,e:'« Aller » est irrégulier : ils vont.'},
+     {q:'Conjuguez « finir » avec « nous » :',o:['nous finis','nous finissons','nous finissent','nous finirons'],a:1,e:'Au présent : nous finissons.'}]},
+ {title:'Le schéma narratif',
+  p:['Un récit suit souvent cinq étapes : <b>situation initiale</b>, <b>élément perturbateur</b>, <b>péripéties</b>, <b>élément de résolution</b>, <b>situation finale</b>.',
+     'L’élément perturbateur est ce qui déclenche l’histoire et casse l’équilibre de départ.',
+     'Les péripéties sont les événements qui s’enchaînent avant la fin.'],
+  q:[{q:'Quelle est la première étape d’un récit ?',o:['La situation finale','La situation initiale','Les péripéties','La résolution'],a:1,e:'La situation initiale présente les personnages et le cadre.'},
+     {q:'Ce qui casse l’équilibre de départ est :',o:['La situation finale','L’élément perturbateur','La résolution','Le titre'],a:1,e:'L’élément perturbateur déclenche l’action.'},
+     {q:'La dernière étape d’un récit est :',o:['La situation initiale','Le perturbateur','La situation finale','Les péripéties'],a:2,e:'La situation finale termine l’histoire.'}]}
+]},
+{id:'histoire', ico:'🏛️', name:'Histoire-Géo', c:'#8ecae6', desc:'Préhistoire, Rome et cartes.', chapters:[
+ {title:'Rome antique',
+  p:['Rome passe d’un régime républicain à l’<b>Empire</b> en 27 av. J.-C., sous <b>Auguste</b>.',
+     'La langue officielle de Rome est le <b>latin</b>.',
+     'Les Romains appelaient la Méditerranée <b>Mare Nostrum</b>, « notre mer ».'],
+  q:[{q:'Quel est le premier empereur romain ?',o:['Jules César','Auguste','Néron','Trajan'],a:1,e:'Auguste est le premier empereur, en 27 av. J.-C.'},
+     {q:'Quelle langue parlait-on à Rome ?',o:['Le grec','Le latin','L’italien','Le gaulois'],a:1,e:'Le latin est la langue de Rome.'},
+     {q:'Comment les Romains appelaient-ils la Méditerranée ?',o:['Mare Nostrum','Mare Magnum','Terra Nova','Mare Gallicum'],a:0,e:'Mare Nostrum signifie « notre mer ».'}]},
+ {title:'La Préhistoire',
+  p:['Le <b>Paléolithique</b> est la période des chasseurs-cueilleurs, qui taillent la pierre.',
+     'Le <b>Néolithique</b> voit apparaître l’agriculture et l’élevage.',
+     'Avec l’agriculture, les hommes deviennent <b>sédentaires</b> et construisent des villages.'],
+  q:[{q:'Pendant quelle période apparaît l’agriculture ?',o:['Le Paléolithique','Le Néolithique','L’Antiquité','Le Moyen Âge'],a:1,e:'L’agriculture apparaît au Néolithique.'},
+     {q:'Que signifie « sédentaire » ?',o:['Qui voyage sans cesse','Qui vit au même endroit','Qui chasse seulement','Qui vit sous terre'],a:1,e:'Sédentaire : qui s’installe durablement.'},
+     {q:'Comment les hommes du Paléolithique fabriquaient-ils leurs outils ?',o:['En bronze','En fer','En taillant la pierre','En plastique'],a:2,e:'Ils taillaient la pierre, comme le silex.'}]},
+ {title:'Les cartes et l’échelle',
+  p:['L’<b>échelle</b> indique le rapport entre la distance sur la carte et la distance réelle.',
+     'À l’échelle 1/100 000, 1 cm sur la carte représente 100 000 cm, soit <b>1 km</b> en réalité.',
+     'Sur une carte, le <b>nord</b> est généralement placé en haut.'],
+  q:[{q:'À l’échelle 1/100 000, 2 cm sur la carte représentent :',o:['200 m','2 km','20 km','2 m'],a:1,e:'1 cm = 1 km, donc 2 cm = 2 km.'},
+     {q:'À l’échelle 1/50 000, 1 cm représente :',o:['50 m','500 m','5 km','1 km'],a:1,e:'1 cm × 50 000 = 50 000 cm = 500 m.'},
+     {q:'Sur une carte classique, où se trouve généralement le nord ?',o:['En bas','À gauche','En haut','À droite'],a:2,e:'Le nord est en haut.'}]}
+]},
+{id:'sciences', ico:'🌱', name:'Sciences', c:'#b8f2a4', desc:'Le vivant, la matière et la lumière.', chapters:[
+ {title:'Les besoins du vivant',
+  p:['Un être vivant se <b>nourrit</b>, <b>respire</b>, se <b>reproduit</b> et grandit.',
+     'Les plantes fabriquent leur nourriture par la <b>photosynthèse</b> : elles absorbent du dioxyde de carbone et de l’eau, et libèrent du dioxygène.',
+     'Le <b>milieu de vie</b> fournit l’eau, l’air, la lumière et la nourriture.'],
+  q:[{q:'Quel gaz une plante absorbe-t-elle pour la photosynthèse ?',o:['Le dioxygène','Le dioxyde de carbone','L’azote','L’hélium'],a:1,e:'La plante absorbe du CO₂ et rejette du dioxygène.'},
+     {q:'Quelle fonction permet à un animal de se procurer de la nourriture ?',o:['La reproduction','La nutrition','La croissance','La respiration'],a:1,e:'La nutrition regroupe la recherche et la digestion des aliments.'},
+     {q:'Lequel est un besoin de base d’un être vivant ?',o:['Une voiture','L’eau','Un téléphone','Une montre'],a:1,e:'L’eau est indispensable à tout être vivant.'}]},
+ {title:'Mélanges et solutions',
+  p:['Dans une <b>solution</b>, le <b>solvant</b> (souvent l’eau) dissout le <b>soluté</b> (le sucre, le sel…).',
+     'Un mélange est <b>homogène</b> si on ne voit qu’une seule phase (eau sucrée), <b>hétérogène</b> sinon (sable dans l’eau).',
+     'Le soluté ne disparaît pas : on peut le retrouver en évaporant le solvant.'],
+  q:[{q:'Dans l’eau sucrée, quel est le soluté ?',o:['L’eau','Le sucre','Le verre','Aucun'],a:1,e:'Le sucre est dissous : c’est le soluté.'},
+     {q:'Le mélange sable + eau est :',o:['Homogène','Hétérogène','Une solution','Un gaz'],a:1,e:'On voit distinctement le sable et l’eau : hétérogène.'},
+     {q:'Quel est le solvant le plus courant ?',o:['Le sel','L’huile','L’eau','Le sucre'],a:2,e:'L’eau est le solvant le plus courant.'}]},
+ {title:'La lumière',
+  p:['La lumière se propage en <b>ligne droite</b> dans un milieu transparent et homogène.',
+     'Une <b>source</b> de lumière (le Soleil, une lampe) émet sa propre lumière. Un objet <b>éclairé</b> ne fait que la renvoyer.',
+     'La lumière voyage beaucoup plus vite que le son.'],
+  q:[{q:'Dans quel milieu la lumière se propage-t-elle en ligne droite ?',o:['Dans un milieu transparent et homogène','Dans un brouillard','Dans une pièce noire','Dans un mur opaque'],a:0,e:'Dans un milieu transparent et homogène, elle suit une ligne droite.'},
+     {q:'Parmi ces objets, lequel est une source de lumière ?',o:['La Lune','Une table','Le Soleil','Un livre'],a:2,e:'Le Soleil émet sa propre lumière ; la Lune la reçoit et la renvoie.'},
+     {q:'La lumière se propage plus vite que le son :',o:['Vrai','Faux'],a:0,e:'La lumière est environ un million de fois plus rapide que le son.'}]}
+]}
+];
+
+</script>
+<script>
+// Programme de 5e : chaque matière contient ses chapitres, chacun avec un cours et des exercices.
+window.DATA_5E = [
+{id:'maths', ico:'➗', name:'Mathématiques', c:'#ffd166', desc:'Fractions, nombres relatifs, angles et proportionnalité.', chapters:[
+ {title:'Les fractions',
+  p:['Pour additionner des fractions de même dénominateur, on additionne les numérateurs : <b>2/3 + 1/3 = 1</b>.',
+     'Pour multiplier : <b>a/b × c/d = ac/bd</b>.',
+     'Diviser par une fraction revient à multiplier par son <b>inverse</b> : 1/2 ÷ 1/4 = 2.'],
+  q:[{q:'Combien vaut 2/3 + 1/3 ?',o:['3/6','1','2/3','3/3 hors'],a:1,e:'2/3 + 1/3 = 3/3 = 1.'},
+     {q:'Combien vaut 3/4 × 2/5 ?',o:['6/20','5/9','3/10','6/9'],a:2,e:'6/20 se simplifie en 3/10.'},
+     {q:'Combien vaut 1/2 ÷ 1/4 ?',o:['1/8','2','1/2','4'],a:1,e:'1/2 × 4/1 = 2.'}]},
+ {title:'Les nombres relatifs',
+  p:['Un <b>nombre relatif</b> est positif (+) ou négatif (−), selon sa position par rapport à zéro.',
+     'Addition de deux nombres de signes contraires : on soustrait les distances à zéro et on garde le signe du plus grand. Ex : (−3) + 5 = 2.',
+     'Produit : un produit de deux négatifs est positif. Ex : (−4) × (−2) = 8.'],
+  q:[{q:'Combien vaut (−3) + 5 ?',o:['−8','−2','2','8'],a:2,e:'Le plus grand en valeur absolue est 5 (positif) : 5 − 3 = 2.'},
+     {q:'Combien vaut (−4) × (−2) ?',o:['−8','8','−6','6'],a:1,e:'Un produit de deux négatifs est positif : 8.'},
+     {q:'Combien vaut (−6) − (−2) ?',o:['−8','−4','4','8'],a:1,e:'Soustraire −2 revient à ajouter 2 : −6 + 2 = −4.'}]},
+ {title:'Les angles',
+  p:['Un <b>angle droit</b> mesure 90°, un <b>angle plat</b> mesure 180°.',
+     'La somme des angles d’un <b>triangle</b> est toujours égale à <b>180°</b>.',
+     'Deux angles sont <b>complémentaires</b> si leur somme vaut 90°.'],
+  q:[{q:'Dans un triangle, deux angles mesurent 50° et 60°. Le troisième ?',o:['60°','70°','80°','90°'],a:1,e:'180 − (50 + 60) = 70°.'},
+     {q:'Combien mesure un angle plat ?',o:['90°','180°','270°','360°'],a:1,e:'Un angle plat mesure 180°.'},
+     {q:'Deux angles complémentaires : l’un mesure 35°. L’autre ?',o:['45°','55°','65°','145°'],a:1,e:'90 − 35 = 55°.'}]},
+ {title:'La proportionnalité',
+  p:['Deux grandeurs sont <b>proportionnelles</b> si on passe de l’une à l’autre en multipliant toujours par le même nombre (le coefficient).',
+     'Ex : 3 kg coûtent 6 €, donc 1 kg coûte 2 €, et 5 kg coûtent 10 €.',
+     'Un tableau de proportionnalité se complète en utilisant le coefficient ou le produit en croix.'],
+  q:[{q:'3 kg coûtent 6 €. Combien coûtent 4 kg ?',o:['7 €','8 €','9 €','12 €'],a:1,e:'Le prix d’1 kg est 2 €, donc 4 kg coûtent 8 €.'},
+     {q:'Une recette pour 4 personnes utilise 200 g de farine. Pour 6 personnes ?',o:['250 g','300 g','400 g','150 g'],a:1,e:'200 × 6/4 = 300 g.'},
+     {q:'Les grandeurs suivantes sont-elles proportionnelles ? (2 ; 4) (3 ; 7)',o:['Oui','Non','Peut-être','Impossible à dire'],a:1,e:'4/2 = 2 mais 7/3 n’est pas 2 : elles ne sont pas proportionnelles.'}]}
+]},
+{id:'francais', ico:'📚', name:'Français', c:'#ff8fa3', desc:'Passé, fonctions et récit.', chapters:[
+ {title:'L’imparfait et le passé simple',
+  p:['L’<b>imparfait</b> décrit une situation ou une habitude dans le passé : « il pleuvait tous les jours ».',
+     'Le <b>passé simple</b> raconte une action ponctuelle et terminée : « il partit au matin ».',
+     'Dans un récit, on mêle souvent les deux : l’imparfait pour le décor, le passé simple pour l’action.'],
+  q:[{q:'Quel temps est utilisé dans « Il pleuvait tous les jours » ?',o:['Le passé simple','L’imparfait','Le futur','Le présent'],a:1,e:'C’est une habitude répétée dans le passé : imparfait.'},
+     {q:'Quel temps est utilisé dans « Il partit au matin » ?',o:['L’imparfait','Le passé composé','Le passé simple','Le conditionnel'],a:2,e:'Action ponctuelle et terminée : passé simple.'},
+     {q:'Conjuguez « être » à l’imparfait avec « nous » :',o:['nous sommes','nous étions','nous serons','nous fûmes'],a:1,e:'À l’imparfait : nous étions.'}]},
+ {title:'Le complément d’objet',
+  p:['Le <b>complément d’objet direct (COD)</b> complète le verbe sans préposition : « Il mange une pomme ».',
+     'On le trouve en posant la question « qui ? » ou « quoi ? » après le verbe.',
+     'Il peut être remplacé par un pronom : « Il la mange ».'],
+  q:[{q:'Dans « Il mange une pomme », quel est le COD ?',o:['Il','mange','une pomme','Aucun'],a:2,e:'On demande « il mange quoi ? » : une pomme.'},
+     {q:'Dans « Elle regarde le film », quel est le COD ?',o:['elle','regarde','le film','Aucun'],a:2,e:'« Elle regarde quoi ? » : le film.'},
+     {q:'Remplacez « une pomme » par un pronom : « Il mange une pomme » devient :',o:['Il la mange','Il le mange','Il lui mange','Il en mange'],a:3,e:'Pour un COD avec « une », on utilise « en ».'}]},
+ {title:'Le complément circonstanciel',
+  p:['Le <b>complément circonstanciel</b> indique le temps, le lieu, la manière ou la cause : « Hier, il est parti au marché ».',
+     'Il est supprimable sans rendre la phrase fausse, contrairement au COD.',
+     'Il répond aux questions « quand ? », « où ? », « comment ? », « pourquoi ? ».'],
+  q:[{q:'Dans « Hier, il est parti au marché », quel est le complément de temps ?',o:['Hier','il','parti','au marché'],a:0,e:'« Quand ? » : hier.'},
+     {q:'Dans « Elle travaille à Paris », quel est le complément de lieu ?',o:['elle','travaille','à Paris','Aucun'],a:2,e:'« Où ? » : à Paris.'},
+     {q:'Dans « Il court vite », quel complément exprime la manière ?',o:['Il','court','vite','Aucun'],a:2,e:'« Comment ? » : vite.'}]}
+]},
+{id:'histoire', ico:'🏰', name:'Histoire-Géo', c:'#8ecae6', desc:'Féodalité, grandes découvertes et Lumières.', chapters:[
+ {title:'La société féodale',
+  p:['La société féodale est divisée en <b>trois ordres</b> : le clergé, la noblesse et le tiers état.',
+     'Le <b>seigneur</b> vit dans son château et protège les paysans en échange de leur travail.',
+     'Les <b>paysans</b> (serfs) travaillent la terre et doivent payer des redevances au seigneur.'],
+  q:[{q:'Combien d’ordres composent la société féodale ?',o:['Deux','Trois','Quatre','Cinq'],a:1,e:'Clergé, noblesse et tiers état.'},
+     {q:'Qui travaille la terre à l’époque féodale ?',o:['Le roi','Les paysans','Le clergé','Les marchands'],a:1,e:'Les paysans, ou serfs, cultivent les terres du seigneur.'},
+     {q:'Où vit le seigneur ?',o:['Dans un monastère','Dans une cité','Dans un château','Dans une tente'],a:2,e:'Le seigneur habite un château fort.'}]},
+ {title:'Les grandes découvertes',
+  p:['En <b>1492</b>, Christophe Colomb atteint l’Amérique en cherchant la route des Indes.',
+     'En <b>1498</b>, Vasco de Gama ouvre la route maritime des Indes en contournant l’Afrique.',
+     'Entre 1519 et 1522, l’expédition de Magellan réalise le premier tour du monde.'],
+  q:[{q:'En quelle année Christophe Colomb atteint-il l’Amérique ?',o:['1392','1492','1592','1692'],a:1,e:'Il atteint les Caraïbes en 1492.'},
+     {q:'Quelle route Vasco de Gama ouvre-t-il ?',o:['La route de la soie','La route maritime des Indes','La route du Nord','La route du Rhin'],a:1,e:'Il contourne l’Afrique pour rejoindre l’Inde.'},
+     {q:'Quelle expédition réalise le premier tour du monde ?',o:['Colomb','Vasco de Gama','Magellan','Cook'],a:2,e:'L’expédition de Magellan, achevée par Elcano, boucle le globe.'}]},
+ {title:'Les Lumières',
+  p:['Au XVIIIᵉ siècle, les <b>philosophes des Lumières</b> défendent la raison, la tolérance et la liberté.',
+     'Voltaire combat l’intolérance religieuse. Montesquieu propose la <b>séparation des pouvoirs</b> dans <i>L’Esprit des lois</i>.',
+     'Rousseau insiste sur la souveraineté du peuple et le contrat social.'],
+  q:[{q:'Quel philosophe propose la séparation des pouvoirs ?',o:['Voltaire','Montesquieu','Diderot','Rousseau'],a:1,e:'Montesquieu, dans L’Esprit des lois.'},
+     {q:'Quel est le mot-clé des philosophes des Lumières ?',o:['La foi','La raison','La guerre','La tradition'],a:1,e:'Ils placent la raison au cœur de leur pensée.'},
+     {q:'Quel auteur combat l’intolérance religieuse ?',o:['Voltaire','Louis XIV','Colomb','Magellan'],a:0,e:'Voltaire défend la tolérance.'}]}
+]},
+{id:'sciences', ico:'🫁', name:'Sciences', c:'#b8f2a4', desc:'Digestion, respiration et circulation.', chapters:[
+ {title:'La digestion',
+  p:['La digestion commence dans la <b>bouche</b> : les dents broient et la salive commence à transformer l’aliment.',
+     'Les nutriments sont <b>absorbés</b> dans l’<b>intestin grêle</b>, puis passent dans le sang.',
+     'Le <b>foie</b> produit la bile, qui aide à digérer les graisses.'],
+  q:[{q:'Où commence la digestion ?',o:['Dans l’estomac','Dans la bouche','Dans l’intestin','Dans le foie'],a:1,e:'Les dents et la salive commencent la digestion.'},
+     {q:'Où les nutriments sont-ils absorbés ?',o:['Dans la bouche','Dans l’intestin grêle','Dans le gros intestin','Dans l’œsophage'],a:1,e:'C’est dans l’intestin grêle qu’ils passent dans le sang.'},
+     {q:'Quel organe produit la bile ?',o:['Le cœur','Le poumon','Le foie','Le rein'],a:2,e:'Le foie produit la bile.'}]},
+ {title:'La respiration',
+  p:['Lors de l’inspiration, l’air entre dans les <b>poumons</b>, où le <b>dioxygène</b> passe dans le sang.',
+     'Le sang transporte le dioxygène vers les cellules, qui rejettent le <b>dioxyde de carbone</b>.',
+     'Lors de l’expiration, le dioxyde de carbone est rejeté dans l’air.'],
+  q:[{q:'Où le dioxygène passe-t-il dans le sang ?',o:['Dans l’estomac','Dans les poumons','Dans le cœur','Dans le foie'],a:1,e:'Les échanges gazeux se font dans les poumons.'},
+     {q:'Quel gaz est rejeté lors de l’expiration ?',o:['Le dioxygène','Le dioxyde de carbone','L’azote','L’hélium'],a:1,e:'Le CO₂ est rejeté.'},
+     {q:'Qu’est-ce que la respiration pour les cellules ?',o:['Un moyen de digérer','Un échange de gaz nécessaire à leur fonctionnement','Une manière de bouger','Une façon de dormir'],a:1,e:'Les cellules consomment du dioxygène pour fonctionner.'}]},
+ {title:'La circulation sanguine',
+  p:['Le <b>cœur</b> possède quatre cavités : deux oreillettes et deux ventricules.',
+     'La <b>circulation pulmonaire</b> envoie le sang vers les poumons pour s’oxygéner.',
+     'La <b>circulation générale</b> envoie le sang oxygéné vers tout le corps.'],
+  q:[{q:'Combien de cavités possède le cœur humain ?',o:['2','3','4','6'],a:2,e:'Deux oreillettes et deux ventricules.'},
+     {q:'Où le sang va-t-il pour s’oxygéner ?',o:['Dans le foie','Dans les poumons','Dans l’estomac','Dans les reins'],a:1,e:'C’est le rôle de la circulation pulmonaire.'},
+     {q:'Quelle circulation envoie le sang dans tout le corps ?',o:['La circulation pulmonaire','La circulation générale','La circulation digestive','Aucune'],a:1,e:'La circulation générale irrigue tout le corps.'}]}
+]}
+];
+
+</script>
+<script>
+// Mathématiques : cours et exercices originaux, rédigés d'après le programme officiel.
+// Chaque niveau remplace les chapitres de la matière "maths" de ce niveau.
+window.MATHS = {
+'6e': [
+ {title:'Numération et grands nombres',
+  p:['Dans un nombre, chaque chiffre a une <b>valeur</b> selon sa position : 3 052 = 3 × 1 000 + 0 × 100 + 5 × 10 + 2.',
+     'Pour comparer deux entiers, celui qui a le plus de chiffres est le plus grand. À nombre de chiffres égal, on compare de gauche à droite.',
+     'Un million vaut 1 000 000 : il s’écrit avec un chiffre 1 suivi de six zéros.'],
+  q:[{q:'Dans 3 052, quel est le chiffre des centaines ?',o:['3','0','5','2'],a:1,e:'3 052 : il y a 0 centaine.'},
+     {q:'Quel est le plus grand nombre ?',o:['9 999','10 405','9 500','10 040'],a:1,e:'10 405 a 5 chiffres, les autres en ont 4.'},
+     {q:'Quel nombre s’écrit « 4 milliers, 3 centaines et 2 unités » ?',o:['4 032','4 302','4 320','432'],a:1,e:'4 000 + 300 + 2 = 4 302.'}]},
+ {title:'Opérations et division euclidienne',
+  p:['La <b>division euclidienne</b> donne un quotient et un reste : 47 = 5 × 9 + 2, avec 2 < 5.',
+     'Le reste est toujours strictement plus petit que le diviseur.',
+     'Le produit se calcule en posant la multiplication : 12 × 15 = 180.'],
+  q:[{q:'Quel est le quotient de 47 par 5 ?',o:['2','7','9','5'],a:2,e:'47 = 5 × 9 + 2, donc le quotient est 9.'},
+     {q:'Quel est le reste de 47 divisé par 5 ?',o:['2','4','7','9'],a:0,e:'Le reste est 2.'},
+     {q:'Combien vaut 12 × 15 ?',o:['120','170','180','200'],a:2,e:'12 × 15 = 180.'}]},
+ {title:'Droites : parallèles et perpendiculaires',
+  p:['Deux droites <b>perpendiculaires</b> se coupent en formant un <b>angle droit</b> (90°).',
+     'Deux droites <b>parallèles</b> ne se coupent jamais : elles gardent toujours la même distance.',
+     'Par un point donné, on peut tracer une seule perpendiculaire à une droite donnée.'],
+  q:[{q:'Deux droites perpendiculaires forment un angle de :',o:['45°','90°','180°','60°'],a:1,e:'Perpendiculaires = angle droit = 90°.'},
+     {q:'Deux droites parallèles se coupent-elles ?',o:['Oui, toujours','Non, jamais','Parfois','Seulement à l’infini'],a:1,e:'Des droites parallèles ne se rencontrent jamais.'},
+     {q:'Par un point extérieur à une droite, combien de perpendiculaires peut-on tracer ?',o:['Aucune','Une seule','Deux','Une infinité'],a:1,e:'Il n’existe qu’une seule perpendiculaire passant par ce point.'}]},
+ {title:'Triangles et quadrilatères',
+  p:['Un <b>triangle équilatéral</b> a 3 côtés de même longueur. Un <b>triangle isocèle</b> en a deux.',
+     'Un <b>rectangle</b> a 4 angles droits. Un <b>losange</b> a 4 côtés de même longueur.',
+     'Un <b>carré</b> est à la fois un rectangle et un losange.'],
+  q:[{q:'Combien de côtés égaux un triangle équilatéral possède-t-il ?',o:['1','2','3','0'],a:2,e:'Il a ses trois côtés égaux.'},
+     {q:'Quel quadrilatère a 4 angles droits ?',o:['Le losange','Le rectangle','Le trapèze','Le cerf-volant'],a:1,e:'Le rectangle a quatre angles droits.'},
+     {q:'Un carré est-il un rectangle ?',o:['Oui','Non','Seulement parfois','Jamais'],a:0,e:'Un carré a 4 angles droits : c’est un rectangle particulier.'}]},
+ {title:'Longueurs et durées',
+  p:['Conversions de longueurs : 1 m = 100 cm, 1 km = 1 000 m.',
+     'Une heure contient 60 minutes : 1 h = 60 min.',
+     'Pour convertir, on multiplie quand on passe à une petite unité, on divise quand on passe à une grande.'],
+  q:[{q:'Combien vaut 3 m 5 cm en centimètres ?',o:['35 cm','305 cm','350 cm','3 005 cm'],a:1,e:'3 m = 300 cm, plus 5 cm : 305 cm.'},
+     {q:'Combien vaut 1 h 30 min en minutes ?',o:['60 min','90 min','130 min','100 min'],a:1,e:'60 + 30 = 90 min.'},
+     {q:'Combien vaut 2,5 km en mètres ?',o:['25 m','250 m','2 500 m','25 000 m'],a:2,e:'1 km = 1 000 m, donc 2,5 km = 2 500 m.'}]},
+ {title:'Multiples et diviseurs',
+  p:['Un <b>diviseur</b> de n divise n sans reste. Ex : 4 est un diviseur de 12, car 12 = 4 × 3.',
+     'Les <b>multiples</b> de 4 sont 4, 8, 12, 16… (on multiplie 4 par un entier).',
+     'Critères : divisible par 2 si le chiffre des unités est pair ; par 5 s’il vaut 0 ou 5 ; par 10 s’il vaut 0 ; par 3 ou 9 si la somme des chiffres l’est.'],
+  q:[{q:'Lequel est un diviseur de 12 ?',o:['5','7','4','8'],a:2,e:'12 = 4 × 3, donc 4 divise 12.'},
+     {q:'Lequel est divisible par 3 ?',o:['124','231','142','112'],a:1,e:'2 + 3 + 1 = 6, multiple de 3 : 231 = 3 × 77.'},
+     {q:'Quel est le premier multiple non nul de 6 ?',o:['0','3','6','12'],a:2,e:'Le premier multiple non nul de 6 est 6 lui-même.'}]},
+ {title:'Les nombres décimaux : calculs',
+  p:['Multiplier par 10 décale la virgule d’un rang vers la droite : 2,35 × 10 = 23,5.',
+     'Diviser par 10 décale la virgule d’un rang vers la gauche : 4,7 ÷ 10 = 0,47.',
+     'Pour additionner des décimaux, on aligne les virgules : 3,5 + 0,27 = 3,77.'],
+  q:[{q:'Combien vaut 2,35 × 10 ?',o:['23,5','2,350','235','0,235'],a:0,e:'La virgule avance d’un rang.'},
+     {q:'Combien vaut 4,7 ÷ 10 ?',o:['47','0,47','4,07','0,047'],a:1,e:'La virgule recule d’un rang : 0,47.'},
+     {q:'Combien vaut 3,5 + 0,27 ?',o:['3,32','3,77','3,527','6,2'],a:1,e:'3,50 + 0,27 = 3,77.'}]},
+ {title:'Les fractions simples',
+  p:['Une fraction <b>a/b</b> représente a parts sur b parts égales d’un tout (b ≠ 0).',
+     'Pour trouver une fraction d’une quantité : 3/4 de 20 = (20 ÷ 4) × 3 = 15.',
+     'Des fractions peuvent être égales : 2/4 = 1/2, en divisant le haut et le bas par 2.'],
+  q:[{q:'Quelle fraction représente 3 parts sur 4 ?',o:['4/3','3/4','1/4','3/3'],a:1,e:'Le numérateur est le nombre de parts prises : 3.'},
+     {q:'Combien vaut 3/4 de 20 ?',o:['5','15','12','16'],a:1,e:'20 ÷ 4 = 5, puis 5 × 3 = 15.'},
+     {q:'Quelle fraction est égale à 2/4 ?',o:['1/4','1/2','2/3','4/2'],a:1,e:'On divise haut et bas par 2 : 1/2.'}]},
+ {title:'La symétrie axiale',
+  p:['Deux figures sont <b>symétriques par rapport à une droite</b> (l’axe) si l’axe est la médiatrice des segments reliant leurs points.',
+     'Une figure symétrique garde les <b>mêmes longueurs</b> et les mêmes angles.',
+     'Un point situé sur l’axe est son propre symétrique.'],
+  q:[{q:'Une figure et sa symétrique ont-elles les mêmes longueurs ?',o:['Oui','Non','Seulement les côtés','Jamais'],a:0,e:'La symétrie axiale conserve les longueurs et les angles.'},
+     {q:'Combien d’axes de symétrie possède un carré ?',o:['1','2','4','Aucun'],a:2,e:'Le carré a 4 axes : 2 médiatrices et 2 diagonales.'},
+     {q:'Le symétrique d’un point situé sur l’axe est :',o:['Un point différent','Le même point','Le milieu du segment','Hors de la figure'],a:1,e:'Un point sur l’axe est déjà à égale distance de lui-même.'}]},
+ {title:'Périmètre et aire',
+  p:['Le <b>périmètre</b> est la longueur du contour. Rectangle : P = 2 × (L + l).',
+     'L’<b>aire</b> est la surface. Rectangle : A = L × l. Carré de côté c : A = c × c.',
+     'L’aire s’exprime en cm², m², km² : ce ne sont pas des longueurs.'],
+  q:[{q:'Quel est le périmètre d’un rectangle de 5 cm sur 3 cm ?',o:['8 cm','15 cm','16 cm','30 cm'],a:2,e:'P = 2 × (5 + 3) = 16 cm.'},
+     {q:'Quelle est l’aire d’un rectangle de 5 cm sur 3 cm ?',o:['8 cm²','15 cm²','16 cm²','30 cm²'],a:1,e:'A = 5 × 3 = 15 cm².'},
+     {q:'Quelle est l’aire d’un carré de 4 cm de côté ?',o:['8 cm²','12 cm²','16 cm²','4 cm²'],a:2,e:'A = 4 × 4 = 16 cm².'}]},
+ {title:'Mesurer et classer les angles',
+  p:['Un angle se mesure avec un <b>rapporteur</b>, en degrés (°).',
+     'Un angle <b>aigu</b> mesure moins de 90°. Un angle <b>obtus</b> mesure entre 90° et 180°.',
+     'Un angle droit mesure 90°, un angle plat 180°, un tour complet 360°.'],
+  q:[{q:'Un angle de 45° est :',o:['Droit','Aigu','Obtus','Plat'],a:1,e:'Il mesure moins de 90°.'},
+     {q:'Un angle de 120° est :',o:['Aigu','Droit','Obtus','Nul'],a:2,e:'Il est compris entre 90° et 180°.'},
+     {q:'Combien de degrés dans un tour complet ?',o:['180°','270°','360°','90°'],a:2,e:'Un tour complet vaut 360°.'}]},
+ {title:'Tableaux et diagrammes',
+  p:['Un <b>tableau</b> organise des données en lignes et en colonnes.',
+     'Un <b>diagramme en barres</b> représente chaque valeur par la hauteur d’une barre.',
+     'Le <b>total</b> est la somme de toutes les valeurs.'],
+  q:[{q:'Ventes : lundi 12, mardi 8, mercredi 15. Quel est le total ?',o:['23','35','30','15'],a:1,e:'12 + 8 + 15 = 35.'},
+     {q:'Dans ce tableau, quel jour a la plus grande valeur ?',o:['Lundi','Mardi','Mercredi','Aucun'],a:2,e:'Mercredi : 15, la valeur la plus grande.'},
+     {q:'Combien de valeurs comporte ce tableau ?',o:['2','3','8','35'],a:1,e:'Il y a trois jours, donc trois valeurs.'}]},
+ {title:'Priorités des opérations',
+  p:['Dans une expression, on calcule d’abord les <b>parenthèses</b>, puis les <b>multiplications et divisions</b>, enfin les <b>additions et soustractions</b>.',
+     'Ex : 2 + 3 × 4 = 2 + 12 = 14.',
+     'Ex : (2 + 3) × 4 = 5 × 4 = 20.'],
+  q:[{q:'Combien vaut 2 + 3 × 4 ?',o:['20','14','24','11'],a:1,e:'On multiplie d’abord : 3 × 4 = 12, puis 2 + 12 = 14.'},
+     {q:'Combien vaut (2 + 3) × 4 ?',o:['14','20','24','11'],a:1,e:'Les parenthèses d’abord : 5 × 4 = 20.'},
+     {q:'Combien vaut 10 − 2 × 3 ?',o:['24','4','18','8'],a:1,e:'10 − 6 = 4.'}]}
+]
+};
+
+</script>
+<script>
+// Mathématiques 5e, 4e et 3e : chapitres ajoutés aux chapitres existants de chaque niveau.
+window.MATHS_ADD = {
+'5e': [
+ {title:'La symétrie centrale',
+  p:['Le symétrique d’un point A par rapport à un point O est le point A’ tel que <b>O est le milieu de [AA’]</b>.',
+     'La symétrie centrale conserve les longueurs et les angles.',
+     'Un parallélogramme est symétrique par rapport à son centre.'],
+  q:[{q:'Si O est le milieu de [AA’], que dit-on de A’ ?',o:['C’est le symétrique de A par rapport à O','C’est le symétrique de O par rapport à A','C’est un point quelconque','C’est le milieu de [AO]'],a:0,e:'Par définition, A’ est le symétrique de A par rapport à O.'},
+     {q:'La symétrie centrale conserve-t-elle les longueurs ?',o:['Oui','Non','Seulement les diagonales','Jamais'],a:0,e:'C’est une isométrie : les distances sont conservées.'},
+     {q:'Un parallélogramme est symétrique :',o:['Par rapport à un axe seulement','Par rapport à son centre','Jamais','Seulement s’il est un carré'],a:1,e:'Le centre du parallélogramme est le centre de symétrie.'}]},
+ {title:'Calcul littéral : premiers pas',
+  p:['Une <b>expression littérale</b> contient une lettre. Ex : 3x + 2x = 5x.',
+     'La <b>distributivité</b> : k(a + b) = ka + kb. Ex : 3(x + 2) = 3x + 6.',
+     'Pour calculer une valeur, on remplace la lettre par le nombre donné : 2x + 1 pour x = 3 donne 7.'],
+  q:[{q:'Réduire 4a + 3a :',o:['7a²','7a','12a','a'],a:1,e:'Les termes en a s’additionnent : 7a.'},
+     {q:'Développer 3(x + 2) :',o:['3x + 2','3x + 6','x + 6','3x + 5'],a:1,e:'3 × x + 3 × 2 = 3x + 6.'},
+     {q:'Calculer 2x + 1 pour x = 3 :',o:['6','7','5','9'],a:1,e:'2 × 3 + 1 = 7.'}]},
+ {title:'Aires et périmètres : triangle et disque',
+  p:['Aire d’un triangle : <b>(base × hauteur) ÷ 2</b>.',
+     'Aire d’un disque de rayon r : <b>π × r²</b> (environ 3,14 × r²).',
+     'Périmètre d’un cercle (circonférence) : <b>2 × π × r</b>.'],
+  q:[{q:'Aire d’un triangle de base 6 cm et de hauteur 4 cm :',o:['24 cm²','12 cm²','10 cm²','6 cm²'],a:1,e:'(6 × 4) ÷ 2 = 12 cm².'},
+     {q:'Aire d’un disque de rayon 3 cm (valeur approchée) :',o:['9 cm²','18 cm²','28,3 cm²','6π cm²'],a:2,e:'π × 3² ≈ 28,3 cm².'},
+     {q:'Circonférence d’un cercle de rayon 5 cm :',o:['10 cm','10π cm','25π cm','5π cm'],a:1,e:'2 × π × 5 = 10π cm.'}]},
+ {title:'Le cercle',
+  p:['Un <b>cercle</b> est l’ensemble des points situés à la même distance (le <b>rayon</b>) d’un point O, le <b>centre</b>.',
+     'Le <b>diamètre</b> vaut deux rayons : d = 2 × r.',
+     'Le <b>disque</b> est la surface intérieure du cercle.'],
+  q:[{q:'Un diamètre mesure 8 cm. Quel est le rayon ?',o:['16 cm','8 cm','4 cm','2 cm'],a:2,e:'d = 2r, donc r = 8 ÷ 2 = 4 cm.'},
+     {q:'Tous les points d’un cercle sont à la même distance :',o:['Du centre','Du bord','D’un autre cercle','De l’origine du repère uniquement'],a:0,e:'C’est la définition même du cercle : la distance au centre est le rayon.'},
+     {q:'Le disque est :',o:['Le contour du cercle','La surface à l’intérieur du cercle','Le rayon','Le diamètre'],a:1,e:'Le disque est la surface délimitée par le cercle.'}]},
+ {title:'Moyenne et statistiques',
+  p:['La <b>moyenne</b> d’une série est : somme des valeurs ÷ nombre de valeurs.',
+     'L’<b>étendue</b> d’une série est la différence entre la plus grande et la plus petite valeur.',
+     'La moyenne ne change pas si on remplace des valeurs par d’autres de même total.'],
+  q:[{q:'Notes : 10, 12, 14. Quelle est la moyenne ?',o:['10','12','14','36'],a:1,e:'(10 + 12 + 14) ÷ 3 = 12.'},
+     {q:'Quelle est l’étendue de la série 3, 7, 12, 5 ?',o:['9','12','7','4'],a:0,e:'12 − 3 = 9.'},
+     {q:'Une série a une somme de 60 pour 5 valeurs. Quelle est la moyenne ?',o:['10','12','15','20'],a:1,e:'60 ÷ 5 = 12.'}]}
+],
+'4e': [
+ {title:'Puissances',
+  p:['Une <b>puissance</b> a^n est un produit de n facteurs égaux à a : 2³ = 2 × 2 × 2 = 8.',
+     'Produit de puissances de même base : 10² × 10³ = 10⁵ (on additionne les exposants).',
+     'Une puissance de 10 à exposant positif donne 1 suivi de zéros : 10⁴ = 10 000.'],
+  q:[{q:'Combien vaut 2⁵ ?',o:['10','16','32','25'],a:2,e:'2 × 2 × 2 × 2 × 2 = 32.'},
+     {q:'Combien vaut 10² × 10³ ?',o:['10⁶','10⁵','100⁵','10⁰'],a:1,e:'On additionne les exposants : 2 + 3 = 5.'},
+     {q:'Combien vaut 10⁴ ?',o:['1 000','10 000','100','40'],a:1,e:'10⁴ = 10 000.'}]},
+ {title:'Le théorème de Pythagore',
+  p:['Dans un triangle rectangle, le carré de l’hypoténuse est égal à la somme des carrés des deux autres côtés : <b>c² = a² + b²</b>.',
+     'Pour trouver un côté de l’angle droit : b² = c² − a².',
+     'Ex : hypoténuse 5, côté 3 : b² = 25 − 9 = 16, donc b = 4.'],
+  q:[{q:'Dans un triangle rectangle, avec a = 3 et b = 4, quelle est l’hypoténuse c ?',o:['5','7','12','25'],a:0,e:'c² = 9 + 16 = 25, donc c = 5.'},
+     {q:'Hypoténuse 13 et côté 5 : quel est l’autre côté ?',o:['8','12','18','169'],a:1,e:'13² − 5² = 169 − 25 = 144, donc 12.'},
+     {q:'Quel est le côté opposé à l’angle droit ?',o:['Le plus petit','L’hypoténuse','Le côté adjacent','Le rayon'],a:1,e:'L’hypoténuse est le plus long côté, face à l’angle droit.'}]},
+ {title:'Le théorème de Thalès',
+  p:['Si deux droites sécantes sont coupées par deux droites parallèles, les longueurs sont proportionnelles.',
+     'Avec M sur [AB] et N sur [AC], si (MN) // (BC) : AM/AB = AN/AC = MN/BC.',
+     'Ex : AM = 2, AB = 4, AN = 3 : AC = AN × AB ÷ AM = 6.'],
+  q:[{q:'Si (MN) est parallèle à (BC), quelle égalité est vraie ?',o:['AM/AB = AN/AC','AM/AN = AB/AC','AM × AB = AN','AB = AC'],a:0,e:'C’est la propriété de Thalès.'},
+     {q:'AM = 2, AB = 4, AN = 3. Combien vaut AC ?',o:['3','4','6','8'],a:2,e:'AN/AC = AM/AB, donc 3/AC = 2/4, AC = 6.'},
+     {q:'Le théorème de Thalès s’applique lorsque :',o:['Les droites sont perpendiculaires','Les droites sont parallèles','Les droites sont sécantes uniquement','Il n’y a pas de droites'],a:1,e:'Il faut deux droites parallèles coupant deux sécantes.'}]},
+ {title:'Racines carrées',
+  p:['La <b>racine carrée</b> de a est le nombre positif dont le carré vaut a : √49 = 7, car 7² = 49.',
+     'Racine carrée d’un produit : √(a × b) = √a × √b.',
+     'Une racine carrée n’est pas toujours un nombre entier : √50 ≈ 7,07.'],
+  q:[{q:'Combien vaut √49 ?',o:['7','24,5','49','9'],a:0,e:'7 × 7 = 49.'},
+     {q:'Combien vaut √16 × √9 ?',o:['12','25','7','144'],a:0,e:'4 × 3 = 12.'},
+     {q:'Une valeur approchée de √50 est :',o:['5','7,07','25','10'],a:1,e:'7,07² ≈ 50.'}]},
+ {title:'Fonctions linéaires',
+  p:['Une <b>fonction linéaire</b> s’écrit f(x) = a × x, où a est le coefficient.',
+     'Son image de x est a × x : si f(x) = 3x, alors f(4) = 12.',
+     'Sa représentation graphique est une droite qui passe par l’origine du repère.'],
+  q:[{q:'Si f(x) = 3x, combien vaut f(4) ?',o:['7','12','34','1'],a:1,e:'3 × 4 = 12.'},
+     {q:'Quel est le coefficient de f(x) = −2x ?',o:['2','−2','x','0'],a:1,e:'Le coefficient est −2.'},
+     {q:'La droite représentant une fonction linéaire passe par :',o:['Le point (1 ; 1)','L’origine du repère','Le point (0 ; 1)','Le point (2 ; 0)'],a:1,e:'f(0) = 0 : elle passe par l’origine.'}]},
+ {title:'Statistiques : médiane et étendue',
+  p:['La <b>médiane</b> partage la série ordonnée en deux parties de même effectif.',
+     'Si l’effectif est impair, c’est la valeur du milieu. Si pair, c’est la moyenne des deux valeurs du milieu.',
+     'L’étendue est la différence entre la plus grande et la plus petite valeur.'],
+  q:[{q:'Médiane de 2, 5, 7, 9, 11 :',o:['5','7','9','2'],a:1,e:'La valeur du milieu est 7.'},
+     {q:'Médiane de 2, 4, 6, 8 :',o:['4','5','6','8'],a:1,e:'(4 + 6) ÷ 2 = 5.'},
+     {q:'Étendue de 4, 9, 15, 2 :',o:['13','15','2','6'],a:0,e:'15 − 2 = 13.'}]},
+ {title:'Nombres en écriture scientifique',
+  p:['Une écriture scientifique s’écrit <b>a × 10ⁿ</b> avec 1 ≤ a < 10.',
+     'Ex : 3 500 = 3,5 × 10³.',
+     'Ex : 0,004 = 4 × 10⁻³.'],
+  q:[{q:'L’écriture scientifique de 3 500 est :',o:['35 × 10²','3,5 × 10³','0,35 × 10⁴','3 500 × 10⁰'],a:1,e:'Le premier facteur doit être entre 1 et 10.'},
+     {q:'Quel est le premier facteur de 4,2 × 10⁵ ?',o:['4,2','42','0,42','420'],a:0,e:'Il est déjà compris entre 1 et 10.'},
+     {q:'Combien vaut 10⁻²  ?',o:['0,01','0,1','100','−100'],a:0,e:'10⁻² = 1/10² = 0,01.'}]}
+],
+'3e': [
+ {title:'Le théorème de Pythagore réciproque',
+  p:['Si, dans un triangle, le carré du plus grand côté est égal à la somme des carrés des deux autres, alors le triangle est <b>rectangle</b>.',
+     'Ex : 6, 8, 10 : 6² + 8² = 36 + 64 = 100 = 10², donc le triangle est rectangle.',
+     'Sans cette égalité, le triangle n’est pas rectangle.'],
+  q:[{q:'Le triangle de côtés 6, 8, 10 est-il rectangle ?',o:['Oui','Non','Impossible à dire','Seulement si isocèle'],a:0,e:'36 + 64 = 100 = 10².'},
+     {q:'Le triangle de côtés 4, 5, 6 est-il rectangle ?',o:['Oui','Non','Oui si isocèle','On ne sait pas'],a:1,e:'16 + 25 = 41 ≠ 36.'},
+     {q:'Quel théorème permet de montrer qu’un triangle est rectangle ?',o:['Thalès','Pythagore réciproque','Le théorème du cercle','Le théorème de la médiane'],a:1,e:'C’est la réciproque de Pythagore.'}]},
+ {title:'Trigonométrie dans le triangle rectangle',
+  p:['Dans un triangle rectangle, <b>cos = côté adjacent ÷ hypoténuse</b>.',
+     '<b>sin = côté opposé ÷ hypoténuse</b>, et <b>tan = côté opposé ÷ côté adjacent</b>.',
+     'Mnémotechnique : SOH CAH TOA.'],
+  q:[{q:'Dans un triangle rectangle, adjacent = 3 et hypoténuse = 5. Combien vaut cos ?',o:['0,6','0,8','1,67','0,75'],a:0,e:'cos = 3/5 = 0,6.'},
+     {q:'Opposé = 4 et adjacent = 3. Combien vaut tan ?',o:['4/3','3/4','4/5','5/4'],a:0,e:'tan = opposé/adjacent = 4/3.'},
+     {q:'Quel rapport donne le sinus ?',o:['Adjacent / hypoténuse','Opposé / hypoténuse','Opposé / adjacent','Hypoténuse / opposé'],a:1,e:'sin = opposé / hypoténuse.'}]},
+ {title:'Équations produits',
+  p:['Un produit de facteurs est nul si et seulement si l’un des facteurs est nul.',
+     'Ex : (x − 2)(x + 3) = 0 équivaut à x − 2 = 0 ou x + 3 = 0.',
+     'Les solutions sont donc x = 2 ou x = −3.'],
+  q:[{q:'Résoudre (x − 2)(x + 3) = 0 :',o:['x = 2 seulement','x = 2 ou x = −3','x = −2 ou x = 3','x = 0'],a:1,e:'Chaque facteur peut être nul.'},
+     {q:'Résoudre 5(x − 1) = 0 :',o:['x = 0','x = 1','x = 5','x = −1'],a:1,e:'x − 1 = 0, donc x = 1.'},
+     {q:'Combien de solutions a (x + 4)(x + 4) = 0 ?',o:['0','1','2','Une infinité'],a:1,e:'Les deux facteurs donnent la même solution x = −4.'}]},
+ {title:'Fonctions affines',
+  p:['Une <b>fonction affine</b> s’écrit f(x) = a x + b, où a est le coefficient directeur et b l’ordonnée à l’origine.',
+     'Ex : f(x) = 2x + 1 : f(3) = 7.',
+     'Sa représentation graphique est une droite.'],
+  q:[{q:'Si f(x) = 2x + 1, combien vaut f(3) ?',o:['6','7','5','9'],a:1,e:'2 × 3 + 1 = 7.'},
+     {q:'Dans f(x) = −3x + 5, quelle est l’ordonnée à l’origine ?',o:['−3','5','3','0'],a:1,e:'C’est le nombre b, ici 5.'},
+     {q:'Quel est le coefficient directeur de f(x) = 4x − 2 ?',o:['4','−2','2','0'],a:0,e:'C’est le coefficient de x : 4.'}]},
+ {title:'Probabilités',
+  p:['Une <b>probabilité</b> est un nombre entre 0 et 1 : elle vaut nombre de cas favorables ÷ nombre de cas possibles.',
+     'Un événement impossible a une probabilité 0, un événement certain a une probabilité 1.',
+     'Ex : sur un dé à 6 faces, P(pair) = 3/6 = 1/2.'],
+  q:[{q:'Quelle est la probabilité d’obtenir un nombre pair sur un dé à 6 faces ?',o:['1/6','1/2','1/3','2/3'],a:1,e:'Il y a 3 nombres pairs sur 6 : 3/6 = 1/2.'},
+     {q:'Quelle est la probabilité d’un événement impossible ?',o:['0','1','1/2','−1'],a:0,e:'Un événement impossible a une probabilité nulle.'},
+     {q:'Dans un sac de 4 billes rouges et 6 bleues, P(bille rouge) ?',o:['4/10','6/10','4/6','1/4'],a:0,e:'4 billes rouges sur 10 billes : 4/10.'}]},
+ {title:'Racines carrées et calculs',
+  p:['√a × √a = a, par exemple √7 × √7 = 7.',
+     '√(a²) = a pour a positif : √(81) = 9.',
+     'On peut simplifier : √18 = √(9 × 2) = 3√2.'],
+  q:[{q:'Combien vaut √81 ?',o:['9','40,5','81','8,1'],a:0,e:'9² = 81.'},
+     {q:'Simplifier √18 :',o:['9√2','3√2','√9 + √2','6√3'],a:1,e:'√18 = √9 × √2 = 3√2.'},
+     {q:'Combien vaut √7 × √7 ?',o:['√49','7','14','49'],a:1,e:'√7 × √7 = 7.'}]},
+ {title:'Volumes : prisme et cylindre',
+  p:['Le volume d’un <b>prisme droit</b> ou d’un <b>cylindre</b> = aire de la base × hauteur.',
+     'Pour un cylindre de rayon r et de hauteur h : V = π × r² × h.',
+     'Les unités de volume sont le cm³, le m³ ; 1 L = 1 dm³.'],
+  q:[{q:'Volume d’un prisme de base 10 cm² et de hauteur 4 cm :',o:['14 cm³','40 cm³','4 cm³','20 cm³'],a:1,e:'10 × 4 = 40 cm³.'},
+     {q:'Volume d’un cylindre de rayon 2 cm et de hauteur 5 cm (valeur approchée) :',o:['31,4 cm³','62,8 cm³','10 cm³','20 cm³'],a:1,e:'π × 2² × 5 ≈ 62,8 cm³.'},
+     {q:'Combien de dm³ dans 1 litre ?',o:['10','100','1','1000'],a:2,e:'1 L = 1 dm³.'}]}
+]
+};
+
+</script>
+<script>
+const LEVELS = ['6e','5e','4e','3e'];
+
+const DATA = {
+'6e': [
+ {id:'maths', ico:'➗', name:'Mathématiques', c:'#ffd166', desc:'Les nombres décimaux', chap:'Chapitre : les nombres décimaux',
+  p:['Dans <b>4,57</b>, le 5 est le chiffre des <b>dixièmes</b> et le 7 celui des <b>centièmes</b>.',
+     'Pour comparer, on compare la partie entière, puis les dixièmes, puis les centièmes : <b>2,8 > 2,75</b>.',
+     'Multiplier par 0,5 revient à prendre la moitié : 12 × 0,5 = 6.'],
+  q:[{q:'Quel est le chiffre des dixièmes de 4,57 ?',o:['4','5','7','57'],a:1,e:'Le premier chiffre après la virgule est celui des dixièmes : 5.'},
+     {q:'Lequel est le plus grand ?',o:['2,75','2,8','2,075','2,07'],a:1,e:'2,8 = 2,80 et 2,80 > 2,75.'},
+     {q:'Combien vaut 12 × 0,5 ?',o:['5','6','12','24'],a:1,e:'Multiplier par 0,5 revient à prendre la moitié : 6.'}]},
+ {id:'francais', ico:'📚', name:'Français', c:'#ff8fa3', desc:'Le groupe nominal', chap:'Chapitre : le groupe nominal',
+  p:['Un <b>groupe nominal</b> est organisé autour d’un nom : <b>déterminant + nom + adjectif</b>.',
+     'Le <b>déterminant</b> (le, la, un, ces, mon…) se place devant le nom.',
+     'L’<b>adjectif</b> qualifie le nom : « une maison <b>vieille</b> ».'],
+  q:[{q:'Dans « la vieille maison », quel est le déterminant ?',o:['vieille','maison','la','vieille maison'],a:2,e:'« La » introduit le nom « maison » : c’est le déterminant.'},
+     {q:'Quel est l’adjectif dans « un chien féroce » ?',o:['un','chien','féroce','chien féroce'],a:2,e:'« Féroce » qualifie le nom « chien ».'},
+     {q:'Quel est le nom principal de « ces belles fleurs » ?',o:['ces','belles','fleurs','belle'],a:2,e:'Le nom autour duquel s’organise le groupe est « fleurs ».'}]},
+ {id:'histoire', ico:'🏛️', name:'Histoire-Géo', c:'#8ecae6', desc:'Rome antique', chap:'Chapitre : Rome, de la République à l’Empire',
+  p:['Rome passe d’un régime républicain à l’<b>Empire</b> en 27 av. J.-C., sous <b>Auguste</b>.',
+     'La langue officielle de Rome est le <b>latin</b>.',
+     'La Méditerranée est au cœur de l’Empire : les Romains l’appelaient <b>Mare Nostrum</b>, « notre mer ».'],
+  q:[{q:'Quel est le premier empereur romain ?',o:['Jules César','Auguste','Néron','Trajan'],a:1,e:'Auguste est le premier empereur, en 27 av. J.-C.'},
+     {q:'Quelle langue parlait-on à Rome ?',o:['Le grec','Le latin','L’italien','Le gaulois'],a:1,e:'Le latin est la langue de Rome, et la racine de l’italien.'},
+     {q:'Comment les Romains appelaient-ils la Méditerranée ?',o:['Mare Nostrum','Mare Magnum','Terra Nova','Mare Gallicum'],a:0,e:'Mare Nostrum signifie « notre mer ».'}]},
+ {id:'sciences', ico:'🌱', name:'Sciences', c:'#b8f2a4', desc:'Le vivant et ses besoins', chap:'Chapitre : les besoins du vivant',
+  p:['Un être vivant se <b>nourrit</b>, <b>respire</b>, se <b>reproduit</b> et grandit.',
+     'Les plantes fabriquent leur nourriture par la <b>photosynthèse</b> : elles absorbent du dioxyde de carbone et de l’eau, et libèrent du dioxygène.',
+     'Le <b>milieu de vie</b> fournit à l’être vivant ce dont il a besoin : eau, air, lumière, nourriture.'],
+  q:[{q:'Quel gaz une plante absorbe-t-elle pour la photosynthèse ?',o:['Le dioxygène','Le dioxyde de carbone','L’azote','L’hélium'],a:1,e:'La plante absorbe du CO₂ et rejette du dioxygène.'},
+     {q:'Quelle fonction permet à un animal de se procurer de la nourriture ?',o:['La reproduction','La nutrition','La croissance','La respiration'],a:1,e:'La nutrition regroupe la recherche et la digestion des aliments.'},
+     {q:'Lequel n’est pas un besoin de base d’un être vivant ?',o:['L’eau','L’air','La lumière du jour pour tous','La nourriture'],a:2,e:'La lumière est importante pour les plantes, mais tous les êtres vivants n’en ont pas besoin de la même manière.'}]}
+],
+'5e': [
+ {id:'maths', ico:'➗', name:'Mathématiques', c:'#ffd166', desc:'Les fractions', chap:'Chapitre : les fractions',
+  p:['Pour additionner des fractions de même dénominateur, on additionne les numérateurs : <b>2/3 + 1/3 = 3/3 = 1</b>.',
+     'Pour multiplier : <b>a/b × c/d = ac/bd</b>.',
+     'Diviser par une fraction revient à multiplier par son <b>inverse</b> : 1/2 ÷ 1/4 = 1/2 × 4/1 = 2.'],
+  q:[{q:'Combien vaut 2/3 + 1/3 ?',o:['3/6','1','2/3','3/3 hors'],a:1,e:'2/3 + 1/3 = 3/3 = 1.'},
+     {q:'Combien vaut 3/4 × 2/5 ?',o:['6/20','5/9','3/10','6/9'],a:2,e:'3 × 2 = 6 et 4 × 5 = 20, donc 6/20 = 3/10.'},
+     {q:'Combien vaut 1/2 ÷ 1/4 ?',o:['1/8','2','1/2','4'],a:1,e:'On multiplie par l’inverse : 1/2 × 4 = 2.'}]},
+ {id:'francais', ico:'📚', name:'Français', c:'#ff8fa3', desc:'Les temps du passé', chap:'Chapitre : imparfait et passé simple',
+  p:['L’<b>imparfait</b> décrit une situation ou une habitude dans le passé : « il pleuvait tous les jours ».',
+     'Le <b>passé simple</b> raconte une action ponctuelle et terminée : « il partit au matin ».',
+     'Dans un récit, on mélange souvent les deux : l’imparfait pour le décor, le passé simple pour l’action.'],
+  q:[{q:'Quel temps est utilisé dans « Il pleuvait tous les jours » ?',o:['Le passé simple','L’imparfait','Le futur','Le présent'],a:1,e:'C’est une habitude répétée dans le passé : imparfait.'},
+     {q:'Quel temps est utilisé dans « Il partit au matin » ?',o:['L’imparfait','Le passé composé','Le passé simple','Le conditionnel'],a:2,e:'Action ponctuelle et terminée : passé simple.'},
+     {q:'Conjuguez « être » au présent avec « nous ».',o:['nous sommes','nous sont','nous étions','nous serons'],a:0,e:'Au présent, « être » donne « nous sommes ».'}]},
+ {id:'histoire', ico:'🏰', name:'Histoire-Géo', c:'#8ecae6', desc:'La société féodale', chap:'Chapitre : le Moyen Âge et la société féodale',
+  p:['La société féodale est divisée en <b>trois ordres</b> : le clergé, la noblesse et le tiers état.',
+     'Le <b>seigneur</b> vit dans son château et protège les paysans en échange de leur travail.',
+     'Les <b>paysans</b> (serfs) travaillent la terre et doivent payer des redevances au seigneur.'],
+  q:[{q:'Combien d’ordres composent la société féodale ?',o:['Deux','Trois','Quatre','Cinq'],a:1,e:'Clergé, noblesse et tiers état.'},
+     {q:'Qui travaille la terre à l’époque féodale ?',o:['Le roi','Les paysans','Le clergé','Les marchands'],a:1,e:'Les paysans, ou serfs, cultivent les terres du seigneur.'},
+     {q:'Où vit le seigneur ?',o:['Dans un monastère','Dans une cité','Dans un château','Dans une tente'],a:2,e:'Le seigneur habite un château fort.'}]},
+ {id:'sciences', ico:'🫁', name:'Sciences', c:'#b8f2a4', desc:'Le système digestif', chap:'Chapitre : la digestion',
+  p:['La digestion commence dans la <b>bouche</b> : les dents broient et la salive commence à transformer l’aliment.',
+     'Les nutriments sont <b>absorbés</b> dans l’<b>intestin grêle</b>, puis passent dans le sang.',
+     'Le <b>foie</b> produit la bile, qui aide à digérer les graisses.'],
+  q:[{q:'Où commence la digestion ?',o:['Dans l’estomac','Dans la bouche','Dans l’intestin','Dans le foie'],a:1,e:'Les dents et la salive commencent la digestion dans la bouche.'},
+     {q:'Où les nutriments sont-ils absorbés ?',o:['Dans la bouche','Dans l’intestin grêle','Dans le gros intestin','Dans l’œsophage'],a:1,e:'C’est dans l’intestin grêle que passent les nutriments vers le sang.'},
+     {q:'Quel organe produit la bile ?',o:['Le cœur','Le poumon','Le foie','Le rein'],a:2,e:'Le foie produit la bile.'}]}
+],
+'4e': [
+ {id:'maths', ico:'➗', name:'Mathématiques', c:'#ffd166', desc:'Équations du premier degré', chap:'Chapitre : résoudre une équation',
+  p:['Une équation est une égalité avec une inconnue, souvent notée <b>x</b>.',
+     'Pour résoudre, on isole x en faisant la même opération des deux côtés : 2x + 3 = 11 ⇒ 2x = 8 ⇒ <b>x = 4</b>.',
+     'Vérifier : on remplace x par la solution et on contrôle que l’égalité est vraie.'],
+  q:[{q:'Quelle est la solution de x + 5 = 9 ?',o:['4','14','5','9'],a:0,e:'9 − 5 = 4.'},
+     {q:'Quelle est la solution de 3x = 12 ?',o:['3','4','36','9'],a:1,e:'12 ÷ 3 = 4.'},
+     {q:'Quelle est la solution de 2x − 1 = 5 ?',o:['2','3','6','4'],a:1,e:'2x = 6, donc x = 3.'}]},
+ {id:'francais', ico:'📚', name:'Français', c:'#ff8fa3', desc:'Le point de vue du narrateur', chap:'Chapitre : narrateur et point de vue',
+  p:['Le <b>narrateur interne</b> raconte à la première personne et dit « je » : il est dans l’histoire.',
+     'Le <b>narrateur externe</b> ne connaît que ce qu’il voit et entend, sans accès aux pensées.',
+     'Le <b>narrateur omniscient</b> sait tout, y compris ce que pensent les personnages.'],
+  q:[{q:'Quel narrateur dit « je » et participe à l’histoire ?',o:['Externe','Interne','Omniscient','Absent'],a:1,e:'Le narrateur interne se présente comme un personnage.'},
+     {q:'Quel narrateur connaît les pensées de tous les personnages ?',o:['Externe','Interne','Omniscient','Hors champ'],a:2,e:'Le narrateur omniscient sait tout.'},
+     {q:'Quel narrateur ne décrit que ce qu’il voit, sans accès aux pensées ?',o:['Interne','Omniscient','Externe','Personnage principal'],a:2,e:'Le narrateur externe reste à l’extérieur de la tête des personnages.'}]},
+ {id:'histoire', ico:'🏭', name:'Histoire-Géo', c:'#8ecae6', desc:'La révolution industrielle', chap:'Chapitre : la révolution industrielle au XIXᵉ siècle',
+  p:['Au XIXᵉ siècle, la <b>machine à vapeur</b> fonctionne grâce au <b>charbon</b>.',
+     'Les <b>usines</b> se multiplient dans les villes, et de nombreux ouvriers y travaillent dans des conditions souvent très dures.',
+     'Le chemin de fer se développe et relie les villes et les régions entre elles.'],
+  q:[{q:'Quelle source d’énergie alimente la machine à vapeur ?',o:['Le pétrole','Le charbon','Le gaz naturel','Le soleil'],a:1,e:'Le charbon chauffe l’eau pour produire la vapeur.'},
+     {q:'Où travaillent les ouvriers au XIXᵉ siècle ?',o:['Dans les champs uniquement','Dans les usines','Dans les châteaux','Sur les bateaux de pêche uniquement'],a:1,e:'Les usines se développent avec la révolution industrielle.'},
+     {q:'Quel moyen de transport se développe fortement au XIXᵉ siècle ?',o:['L’avion','La voiture','Le chemin de fer','La fusée'],a:2,e:'Le chemin de fer relie les villes et les régions.'}]},
+ {id:'sciences', ico:'⚡', name:'Sciences', c:'#b8f2a4', desc:'Masse et poids', chap:'Chapitre : masse, poids et force',
+  p:['La <b>masse</b> d’un objet est la quantité de matière qu’il contient. Elle s’exprime en <b>kilogrammes (kg)</b>.',
+     'Le <b>poids</b> est la force d’attraction de la Terre sur un objet. Il s’exprime en <b>newtons (N)</b>.',
+     'La masse ne change pas d’un lieu à l’autre, mais le poids change selon l’attraction (par exemple sur la Lune).'],
+  q:[{q:'Quelle est l’unité de la masse ?',o:['Le newton','Le kilogramme','Le mètre','Le watt'],a:1,e:'La masse s’exprime en kilogrammes.'},
+     {q:'Qu’est-ce que le poids d’un objet ?',o:['La quantité de matière','La force d’attraction de la Terre','Son volume','Sa température'],a:1,e:'Le poids est la force exercée par la gravité.'},
+     {q:'Si on emporte un objet sur la Lune, que change-t-il ?',o:['Sa masse','Son poids','Sa forme','Rien du tout'],a:1,e:'La masse reste la même, le poids diminue car la gravité est plus faible.'}]}
+],
+'3e': [
+ {id:'maths', ico:'➗', name:'Mathématiques', c:'#ffd166', desc:'Identités remarquables', chap:'Chapitre : identités remarquables',
+  p:['<b>(a + b)² = a² + 2ab + b²</b>, par exemple (x + 3)² = x² + 6x + 9.',
+     '<b>(a − b)(a + b) = a² − b²</b>, utile pour factoriser : x² − 4 = (x − 2)(x + 2).',
+     'Pour développer, on applique la formule en repérant a et b.'],
+  q:[{q:'Développer (x + 3)² donne :',o:['x² + 9','x² + 6x + 9','x² + 3x + 9','x² + 6x + 3'],a:1,e:'(x + 3)² = x² + 2×3×x + 9 = x² + 6x + 9.'},
+     {q:'Factoriser x² − 4 :',o:['(x − 4)(x + 1)','(x − 2)(x + 2)','(x − 2)²','(x + 4)(x − 1)'],a:1,e:'C’est a² − b² avec a = x et b = 2.'},
+     {q:'(a − b)(a + b) est égal à :',o:['a² + b²','a² − b²','a² − 2ab + b²','a + b'],a:1,e:'C’est la troisième identité remarquable.'}]},
+ {id:'francais', ico:'🎭', name:'Français', c:'#ff8fa3', desc:'Le théâtre', chap:'Chapitre : le théâtre et ses genres',
+  p:['Une <b>comédie</b> finit bien et cherche à faire rire, une <b>tragédie</b> finit souvent mal pour les héros.',
+     'Les <b>didascalies</b> sont les indications de mise en scène écrites par l’auteur (décor, jeu, ton).',
+     'Au théâtre, le dialogue remplace le récit : les personnages parlent directement au public ou entre eux.'],
+  q:[{q:'Une pièce qui finit mal pour les héros est :',o:['Une comédie','Une tragédie','Un drame bourgeois','Une farce'],a:1,e:'La tragédie se termine souvent par la mort ou la ruine du héros.'},
+     {q:'Comment appelle-t-on les indications de mise en scène ?',o:['Les répliques','Les didascalies','Les monologues','Les tirades'],a:1,e:'Les didascalies sont écrites en italique dans le texte.'},
+     {q:'Quel auteur est connu pour ses comédies, comme « Le Misanthrope » ?',o:['Racine','Corneille','Molière','Hugo'],a:2,e:'Le Misanthrope est une comédie de Molière.'}]},
+ {id:'histoire', ico:'⚔️', name:'Histoire-Géo', c:'#8ecae6', desc:'La Seconde Guerre mondiale', chap:'Chapitre : la Seconde Guerre mondiale',
+  p:['La Seconde Guerre mondiale commence en <b>1939</b> et se termine en <b>1945</b>.',
+     'Le <b>débarquement de Normandie</b> a lieu le <b>6 juin 1944</b>, et ouvre la libération de l’Europe de l’Ouest.',
+     'L’Allemagne capitule le <b>8 mai 1945</b>.'],
+  q:[{q:'En quelle année commence la Seconde Guerre mondiale ?',o:['1914','1918','1939','1945'],a:2,e:'La guerre commence en 1939.'},
+     {q:'Quelle est la date du débarquement de Normandie ?',o:['6 juin 1944','8 mai 1945','11 novembre 1918','14 juillet 1940'],a:0,e:'Le débarquement a lieu le 6 juin 1944.'},
+     {q:'Quelle est la date de la capitulation allemande ?',o:['8 mai 1945','6 juin 1944','1er septembre 1939','11 novembre 1918'],a:0,e:'L’Allemagne capitule le 8 mai 1945.'}]},
+ {id:'sciences', ico:'🧪', name:'Sciences', c:'#b8f2a4', desc:'Les réactions chimiques', chap:'Chapitre : la conservation de la masse',
+  p:['Dans une réaction chimique, les <b>réactifs</b> se transforment en <b>produits</b>.',
+     'La masse totale se <b>conserve</b> : c’est la loi énoncée par <b>Lavoisier</b>.',
+     'Les atomes ne disparaissent pas, ils se réorganisent autrement.'],
+  q:[{q:'Qui a énoncé la loi de conservation de la masse ?',o:['Newton','Lavoisier','Pasteur','Darwin'],a:1,e:'C’est Lavoisier qui a énoncé cette loi.'},
+     {q:'Que deviennent les réactifs lors d’une réaction ?',o:['Ils disparaissent','Ils deviennent des produits','Ils restent identiques','Ils deviennent de la lumière'],a:1,e:'Les réactifs se transforment en produits.'},
+     {q:'Pendant une réaction chimique, la masse totale :',o:['Augmente toujours','Diminue toujours','Se conserve','Devient nulle'],a:2,e:'La masse totale ne change pas.'}]}
+]
+};
+
+const $ = s => document.querySelector(s);
+const COURSES = {...DATA};
+if (window.DATA_6E) COURSES['6e'] = window.DATA_6E;
+if (window.DATA_5E) COURSES['5e'] = window.DATA_5E;
+if (window.MATHS) for (const lv in window.MATHS) { const m = (COURSES[lv]||[]).find(x => x.id === 'maths'); if (m) m.chapters = window.MATHS[lv]; }
+if (window.MATHS_ADD) for (const lv in window.MATHS_ADD) { const m = (COURSES[lv]||[]).find(x => x.id === 'maths'); if (m) { const base = m.chapters || [{title:m.chap.replace('Chapitre : ',''), p:m.p, q:m.q}]; m.chapters = base.concat(window.MATHS_ADD[lv]); } }
+const chapters = s => s.chapters || [{title:s.chap.replace('Chapitre : ',''), p:s.p, q:s.q}];
+let level = localStorage.getItem('cl_level') || '6e';
+let best = JSON.parse(localStorage.getItem('cl_best') || '{}');
+let st = {subj:null, ci:0, tab:'cours', i:0, score:0, answered:false};
+const cur = () => chapters(st.subj)[st.ci];
+const ckey = () => level + '-' + st.subj.id + '-' + st.ci;
+const setTitle = t => { document.title = t + ' · Collège Ludique'; };
+function updateTotal(){ $('#total').textContent = Object.values(best).reduce((a,b)=>a+b,0); }
+
+function home(){
+  st.subj = null;
+  document.body.style.setProperty('--c','#ffd166');
+  setTitle('Accueil');
+  $('#app').innerHTML = `
+    <h1>Le collège, en jeu.</h1>
+    <p class="intro">Choisis ton niveau, puis une matière et un chapitre : lis le cours, fais les exercices.</p>
+    <div class="levels">${LEVELS.map(l => `<button class="${l===level?'on':''}" onclick="setLevel('${l}')">${l}</button>`).join('')}</div>
+    <div class="grid">${(COURSES[level]||[]).map(s => `
+      <button class="tile" style="--c:${s.c}" onclick="openSubject('${s.id}')">
+        <div class="ico">${s.ico}</div>
+        <h3>${s.name}</h3>
+        <p>${s.desc}</p>
+        <span class="best">${chapters(s).length} chapitre${chapters(s).length>1?'s':''}</span>
+      </button>`).join('')}
+    </div>`;
+  updateTotal();
+}
+
+function setLevel(l){ level = l; localStorage.setItem('cl_level', l); home(); }
+
+function openSubject(id){
+  st.subj = COURSES[level].find(s => s.id === id);
+  document.body.style.setProperty('--c', st.subj.c);
+  setTitle(st.subj.name + ' ' + level);
+  $('#app').innerHTML = `
+    <button class="btn ghost" onclick="home()">← Toutes les matières</button>
+    <div class="head"><div class="ico">${st.subj.ico}</div><h1>${st.subj.name} · ${level}</h1></div>
+    <p class="chap">${st.subj.desc}</p>
+    <div class="grid">${chapters(st.subj).map((c,i) => `
+      <button class="tile" onclick="openChapter(${i})">
+        <h3>${c.title}</h3>
+        <span class="best">Meilleur : ${best[level+'-'+st.subj.id+'-'+i] ?? 0}/${c.q.length}</span>
+      </button>`).join('')}
+    </div>`;
+  window.scrollTo(0,0);
+}
+
+function openChapter(i){ st.ci = i; st.tab = 'cours'; chapterPage(); window.scrollTo(0,0); }
+
+function chapterPage(){
+  const c = cur();
+  setTitle(c.title);
+  $('#app').innerHTML = `
+    <button class="btn ghost" onclick="openSubject('${st.subj.id}')">← ${st.subj.name}</button>
+    <div class="head"><div class="ico">${st.subj.ico}</div><h1>${c.title}</h1></div>
+    <p class="chap">${st.subj.name} · ${level}</p>
+    <div class="tabs">
+      <button class="tab ${st.tab==='cours'?'on':''}" onclick="setTab('cours')">📖 Cours</button>
+      <button class="tab ${st.tab==='quiz'?'on':''}" onclick="setTab('quiz')">✏️ Exercices</button>
+    </div>
+    <div class="panel" id="content"></div>`;
+  st.tab === 'cours' ? showLesson() : startQuiz();
+}
+
+function setTab(t){ st.tab = t; chapterPage(); window.scrollTo(0,0); }
+
+function showLesson(){
+  $('#content').innerHTML = `<ul>${cur().p.map(x => `<li>${x}</li>`).join('')}</ul>
+    <div class="row"><span></span><button class="btn" onclick="setTab('quiz')">Faire les exercices →</button></div>`;
+}
+
+function startQuiz(){ st.i = 0; st.score = 0; st.answered = false; quizStep(); }
+
+function quizStep(){
+  const q = cur().q, n = q.length;
+  if (st.i >= n) return endQuiz();
+  const x = q[st.i];
+  $('#content').innerHTML = `
+    <div class="meta">Exercice ${st.i+1} sur ${n} · ${st.score} bonne${st.score>1?'s':''} réponse${st.score>1?'s':''}</div>
+    <div class="bar"><div style="width:${(st.i/n)*100}%"></div></div>
+    <div class="q">${x.q}</div>
+    <div class="opts">${x.o.map((o,k) => `<button class="opt" onclick="answer(${k})">${o}</button>`).join('')}</div>
+    <div id="fb"></div>`;
+}
+
+function answer(k){
+  if (st.answered) return;
+  st.answered = true;
+  const q = cur().q, x = q[st.i];
+  document.querySelectorAll('.opt').forEach((b,j) => {
+    b.disabled = true;
+    if (j === x.a) b.classList.add('good');
+    else if (j === k) b.classList.add('bad');
+  });
+  if (k === x.a) st.score++;
+  const last = st.i + 1 >= q.length;
+  $('#fb').innerHTML = `
+    <div class="exp"><strong>${k===x.a ? '✅ Bravo !' : '❌ Pas tout à fait.'}</strong>${x.e}</div>
+    <div class="row"><span></span><button class="btn" onclick="nextQ()">${last ? 'Voir mon score' : 'Exercice suivant →'}</button></div>`;
+}
+
+function nextQ(){ st.i++; st.answered = false; quizStep(); }
+
+function endQuiz(){
+  const n = cur().q.length, p = st.score;
+  if (p > (best[ckey()] ?? 0)) {
+    best[ckey()] = p;
+    localStorage.setItem('cl_best', JSON.stringify(best));
+  }
+  const msg = p === n ? 'Parfait, tu maîtrises ce chapitre ! 🌟'
+            : p >= n/2 ? 'Bien joué ! Relis le cours pour viser le sans-faute. 👏'
+            : 'Pas grave, relis le cours et retente ta chance. 💪';
+  $('#content').innerHTML = `
+    <div class="end">
+      <div class="meta">Exercices terminés</div>
+      <div class="big">${p}/${n}</div>
+      <p>${msg}</p>
+      <div class="row">
+        <button class="btn" onclick="startQuiz()">Recommencer</button>
+        <button class="btn ghost" onclick="setTab('cours')">Revoir le cours</button>
+        <button class="btn ghost" onclick="openSubject('${st.subj.id}')">Autres chapitres</button>
+      </div>
+    </div>`;
+  updateTotal();
+}
+
+$('#home').addEventListener('click', home);
+$('#home').addEventListener('keydown', e => { if (e.key === 'Enter') home(); });
+home();
+</script>
+</body>
+</html>
